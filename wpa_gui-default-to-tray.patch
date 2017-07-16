@@ -1,0 +1,98 @@
+diff -Naurb wpa_supplicant-2.6.orig/wpa_supplicant/doc/docbook/wpa_gui.8 wpa_supplicant-2.6/wpa_supplicant/doc/docbook/wpa_gui.8
+--- wpa_supplicant-2.6.orig/wpa_supplicant/doc/docbook/wpa_gui.8	2016-10-02 15:09:55.000000000 -0400
++++ wpa_supplicant-2.6/wpa_supplicant/doc/docbook/wpa_gui.8	2017-07-16 16:00:14.221305634 -0400
+@@ -9,7 +9,7 @@
+ wpa_gui \- WPA Graphical User Interface
+ .SH SYNOPSIS
+ 
+-\fBwpa_gui\fR [ \fB-p \fIpath to ctrl sockets\fB\fR ] [ \fB-i \fIifname\fB\fR ] [ \fB-m \fIseconds\fB\fR ] [ \fB-t\fR ] [ \fB-q\fR ]
++\fBwpa_gui\fR [ \fB-p \fIpath to ctrl sockets\fB\fR ] [ \fB-i \fIifname\fB\fR ] [ \fB-m \fIseconds\fB\fR ] [ \fB-w\fR ] [ \fB-q\fR ]
+ 
+ .SH "OVERVIEW"
+ .PP
+@@ -37,10 +37,9 @@
+ strength meter. This value must be a positive integer, otherwise
+ meter is not enabled (default behavior).
+ .TP
+-\fB-t\fR
+-Start program in the system tray only (if the window
+-manager supports it). By default the main status window is
+-shown.
++\fB-w\fR
++Start program in the main window.
++By default the program is started in the system tray.
+ .TP
+ \fB-q\fR
+ Run program in the quiet mode - do not display tray
+diff -Naurb wpa_supplicant-2.6.orig/wpa_supplicant/doc/docbook/wpa_gui.sgml wpa_supplicant-2.6/wpa_supplicant/doc/docbook/wpa_gui.sgml
+--- wpa_supplicant-2.6.orig/wpa_supplicant/doc/docbook/wpa_gui.sgml	2016-10-02 14:51:11.000000000 -0400
++++ wpa_supplicant-2.6/wpa_supplicant/doc/docbook/wpa_gui.sgml	2017-07-16 15:59:34.285125438 -0400
+@@ -17,7 +17,7 @@
+       <arg>-p <replaceable>path to ctrl sockets</replaceable></arg>
+       <arg>-i <replaceable>ifname</replaceable></arg>
+       <arg>-m <replaceable>seconds</replaceable></arg>
+-      <arg>-t</arg>
++      <arg>-w</arg>
+       <arg>-q</arg>
+     </cmdsynopsis>
+   </refsynopsisdiv>
+@@ -61,11 +61,11 @@
+       </varlistentry>
+ 
+       <varlistentry>
+-	<term>-t</term>
++	<term>-w</term>
+ 
+-        <listitem><para>Start program in the system tray only (if the window
+-	manager supports it). By default the main status window is
+-	shown.</para></listitem>
++        <listitem><para>Start program in the main window.
++	By default the program is started in the system tray.
++        </para></listitem>
+       </varlistentry>
+ 
+       <varlistentry>
+diff -Naurb wpa_supplicant-2.6.orig/wpa_supplicant/wpa_gui-qt4/wpa_gui.desktop wpa_supplicant-2.6/wpa_supplicant/wpa_gui-qt4/wpa_gui.desktop
+--- wpa_supplicant-2.6.orig/wpa_supplicant/wpa_gui-qt4/wpa_gui.desktop	2016-10-02 14:51:11.000000000 -0400
++++ wpa_supplicant-2.6/wpa_supplicant/wpa_gui-qt4/wpa_gui.desktop	2017-07-16 15:57:04.403353341 -0400
+@@ -2,7 +2,7 @@
+ Version=1.0
+ Name=wpa_gui
+ Comment=Graphical user interface for wpa_supplicant
+-Exec=wpa_gui
++Exec=wpa_gui -w
+ Icon=wpa_gui
+ GenericName=wpa_supplicant user interface
+ Terminal=false
+diff -Naurb wpa_supplicant-2.6.orig/wpa_supplicant/wpa_gui-qt4/wpagui.cpp wpa_supplicant-2.6/wpa_supplicant/wpa_gui-qt4/wpagui.cpp
+--- wpa_supplicant-2.6.orig/wpa_supplicant/wpa_gui-qt4/wpagui.cpp	2016-10-02 14:51:11.000000000 -0400
++++ wpa_supplicant-2.6/wpa_supplicant/wpa_gui-qt4/wpagui.cpp	2017-07-16 15:56:54.548425270 -0400
+@@ -129,7 +129,7 @@
+ 	add_iface = NULL;
+ 	udr = NULL;
+ 	tray_icon = NULL;
+-	startInTray = false;
++	startInTray = true;
+ 	quietMode = false;
+ 	ctrl_iface = NULL;
+ 	ctrl_conn = NULL;
+@@ -241,7 +241,7 @@
+ 	int c;
+ 	WpaGuiApp *app = qobject_cast<WpaGuiApp*>(qApp);
+ 	for (;;) {
+-		c = getopt(app->argc, app->argv, "i:m:p:tq");
++		c = getopt(app->argc, app->argv, "i:m:p:wq");
+ 		if (c < 0)
+ 			break;
+ 		switch (c) {
+@@ -256,8 +256,8 @@
+ 			free(ctrl_iface_dir);
+ 			ctrl_iface_dir = strdup(optarg);
+ 			break;
+-		case 't':
+-			startInTray = true;
++		case 'w':
++			startInTray = false;
+ 			break;
+ 		case 'q':
+ 			quietMode = true;
